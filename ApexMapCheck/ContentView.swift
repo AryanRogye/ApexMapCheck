@@ -19,7 +19,8 @@ struct ContentView: View {
         .preferredColorScheme(.dark)
         .sheet(isPresented: $showingSettings) {
             SettingsView(
-                currentKey: model.apiKey,
+                currentKey: model.usesBundledAPIKey ? "" : model.apiKey,
+                usesBundledKey: model.usesBundledAPIKey,
                 onSave: { key in await model.saveAPIKey(key) },
                 onRemove: { model.removeAPIKey() }
             )
@@ -36,19 +37,23 @@ struct ContentView: View {
             LazyVStack(spacing: 18) {
                 header
 
-                if let message = model.errorMessage {
-                    ErrorBanner(message: message) {
-                        Task { await model.refresh() }
-                    }
-                }
-
                 if model.isLoading && model.rotations.isEmpty {
                     LoadingView()
+                } else if model.rotations.isEmpty, let message = model.errorMessage {
+                    RotationFailureView(message: message, actionURL: model.errorActionURL) {
+                        Task { await model.refresh() }
+                    }
                 } else if model.rotations.isEmpty {
                     EmptyRotationView {
                         Task { await model.refresh() }
                     }
                 } else {
+                    if let message = model.errorMessage {
+                        ErrorBanner(message: message) {
+                            Task { await model.refresh() }
+                        }
+                    }
+
                     ForEach(model.rotations) { rotation in
                         RotationCard(rotation: rotation)
                     }
@@ -383,11 +388,18 @@ private struct SettingsView: View {
     @State private var key: String
     @State private var isSaving = false
 
+    let usesBundledKey: Bool
     let onSave: (String) async -> Void
     let onRemove: () -> Void
 
-    init(currentKey: String, onSave: @escaping (String) async -> Void, onRemove: @escaping () -> Void) {
+    init(
+        currentKey: String,
+        usesBundledKey: Bool,
+        onSave: @escaping (String) async -> Void,
+        onRemove: @escaping () -> Void
+    ) {
         _key = State(initialValue: currentKey)
+        self.usesBundledKey = usesBundledKey
         self.onSave = onSave
         self.onRemove = onRemove
     }
@@ -396,28 +408,39 @@ private struct SettingsView: View {
         NavigationStack {
             Form {
                 Section("API access") {
-                    SecureField("API key", text: $key)
-                        .textContentType(.password)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
+                    if usesBundledKey {
+                        Label("Included in this build", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+
+                        Text("This build is configured for you and your friends. The key is not stored in the public Git repository.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        SecureField("API key", text: $key)
+                            .textContentType(.password)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                    }
 
                     Link("Manage API access", destination: URL(string: "https://apexlegendsapi.com/#my-api-access")!)
                 }
 
-                Section {
-                    Button("Save and refresh") {
-                        isSaving = true
-                        Task {
-                            await onSave(key.trimmingCharacters(in: .whitespacesAndNewlines))
-                            isSaving = false
+                if !usesBundledKey {
+                    Section {
+                        Button("Save and refresh") {
+                            isSaving = true
+                            Task {
+                                await onSave(key.trimmingCharacters(in: .whitespacesAndNewlines))
+                                isSaving = false
+                                dismiss()
+                            }
+                        }
+                        .disabled(key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving)
+
+                        Button("Remove API key", role: .destructive) {
+                            onRemove()
                             dismiss()
                         }
-                    }
-                    .disabled(key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving)
-
-                    Button("Remove API key", role: .destructive) {
-                        onRemove()
-                        dismiss()
                     }
                 }
 
@@ -472,6 +495,45 @@ private struct LoadingView: View {
                 .foregroundStyle(.white.opacity(0.62))
         }
         .frame(maxWidth: .infinity, minHeight: 360)
+    }
+}
+
+private struct RotationFailureView: View {
+    let message: String
+    let actionURL: URL?
+    let retry: () -> Void
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: actionURL == nil ? "exclamationmark.triangle.fill" : "person.crop.circle.badge.exclamationmark")
+                .font(.system(size: 48, weight: .semibold))
+                .foregroundStyle(actionURL == nil ? Color.yellow : Color.apexRed)
+                .accessibilityHidden(true)
+
+            VStack(spacing: 8) {
+                Text(actionURL == nil ? "Couldn’t load rotations" : "Verify API account")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(.white)
+
+                Text(message)
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.white.opacity(0.62))
+                    .frame(maxWidth: 320)
+            }
+
+            if let actionURL {
+                Link("Verify API account", destination: actionURL)
+                    .buttonStyle(.borderedProminent)
+                    .tint(.apexRed)
+            }
+
+            Button("Try again", action: retry)
+                .buttonStyle(.bordered)
+                .tint(.white)
+        }
+        .frame(maxWidth: .infinity, minHeight: 360)
+        .padding(.horizontal, 24)
     }
 }
 

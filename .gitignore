@@ -26,3 +26,6 @@ fastlane/test_output/
 *.hmap
 *.xccheckout
 *.xcscmblueprint
+
+# Local app secrets (copied into personal/TestFlight builds)
+ApexMapCheck/Secrets.plist

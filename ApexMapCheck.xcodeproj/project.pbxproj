@@ -6,14 +6,68 @@
 	objectVersion = 110;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9BB609E230108AF20055E8E7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BB609E130108AF20055E8E7 /* WidgetKit.framework */; };
+		9BB609E430108AF20055E8E7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BB609E330108AF20055E8E7 /* SwiftUI.framework */; };
+		9BB609F530108AF40055E8E7 /* ApexMapCheckWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9BB609DF30108AF20055E8E7 /* ApexMapCheckWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9BB609F330108AF40055E8E7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BB609BB301082F00055E8E7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9BB609DE30108AF20055E8E7;
+			remoteInfo = ApexMapCheckWidgetsExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		9BB609FA30108AF40055E8E7 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				9BB609F530108AF40055E8E7 /* ApexMapCheckWidgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		9BB609C3301082F00055E8E7 /* ApexMapCheck.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ApexMapCheck.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9BB609DF30108AF20055E8E7 /* ApexMapCheckWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ApexMapCheckWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		9BB609E130108AF20055E8E7 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		9BB609E330108AF20055E8E7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		9BB609F630108AF40055E8E7 /* Exceptions for "ApexMapCheckWidgets" folder in "ApexMapCheckWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 9BB609DE30108AF20055E8E7 /* ApexMapCheckWidgetsExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9BB609C5301082F00055E8E7 /* ApexMapCheck */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = ApexMapCheck;
+			sourceTree = "<group>";
+		};
+		9BB609E530108AF20055E8E7 /* ApexMapCheckWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				9BB609F630108AF40055E8E7 /* Exceptions for "ApexMapCheckWidgets" folder in "ApexMapCheckWidgetsExtension" target */,
+			);
+			path = ApexMapCheckWidgets;
+			sourceTree = "<group>";
+		};
+		A1000001301090000055E8E7 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -24,6 +78,13 @@
 			files = (
 			);
 		};
+		9BB609DC30108AF20055E8E7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				9BB609E430108AF20055E8E7 /* SwiftUI.framework in Frameworks */,
+				9BB609E230108AF20055E8E7 /* WidgetKit.framework in Frameworks */,
+			);
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -31,6 +92,9 @@
 			isa = PBXGroup;
 			children = (
 				9BB609C5301082F00055E8E7 /* ApexMapCheck */,
+				9BB609E530108AF20055E8E7 /* ApexMapCheckWidgets */,
+				A1000001301090000055E8E7 /* Shared */,
+				9BB609E030108AF20055E8E7 /* Frameworks */,
 				9BB609C4301082F00055E8E7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -39,8 +103,18 @@
 			isa = PBXGroup;
 			children = (
 				9BB609C3301082F00055E8E7 /* ApexMapCheck.app */,
+				9BB609DF30108AF20055E8E7 /* ApexMapCheckWidgetsExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		9BB609E030108AF20055E8E7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9BB609E130108AF20055E8E7 /* WidgetKit.framework */,
+				9BB609E330108AF20055E8E7 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -53,16 +127,40 @@
 				9BB609BF301082F00055E8E7 /* Sources */,
 				9BB609C0301082F00055E8E7 /* Frameworks */,
 				9BB609C1301082F00055E8E7 /* Resources */,
+				9BB609FA30108AF40055E8E7 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
+			dependencies = (
+				9BB609F430108AF40055E8E7 /* PBXTargetDependency */,
+			);
 			fileSystemSynchronizedGroups = (
 				9BB609C5301082F00055E8E7 /* ApexMapCheck */,
+				A1000001301090000055E8E7 /* Shared */,
 			);
 			name = ApexMapCheck;
 			productName = ApexMapCheck;
 			productReference = 9BB609C3301082F00055E8E7 /* ApexMapCheck.app */;
 			productType = "com.apple.product-type.application";
+		};
+		9BB609DE30108AF20055E8E7 /* ApexMapCheckWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9BB609F730108AF40055E8E7 /* Build configuration list for PBXNativeTarget "ApexMapCheckWidgetsExtension" */;
+			buildPhases = (
+				9BB609DB30108AF20055E8E7 /* Sources */,
+				9BB609DC30108AF20055E8E7 /* Frameworks */,
+				9BB609DD30108AF20055E8E7 /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				9BB609E530108AF20055E8E7 /* ApexMapCheckWidgets */,
+				A1000001301090000055E8E7 /* Shared */,
+			);
+			name = ApexMapCheckWidgetsExtension;
+			productName = ApexMapCheckWidgetsExtension;
+			productReference = 9BB609DF30108AF20055E8E7 /* ApexMapCheckWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -75,6 +173,9 @@
 				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					9BB609C2301082F00055E8E7 = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					9BB609DE30108AF20055E8E7 = {
 						CreatedOnToolsVersion = 27.0;
 					};
 				};
@@ -94,12 +195,18 @@
 			projectRoot = "";
 			targets = (
 				9BB609C2301082F00055E8E7 /* ApexMapCheck */,
+				9BB609DE30108AF20055E8E7 /* ApexMapCheckWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		9BB609C1301082F00055E8E7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		9BB609DD30108AF20055E8E7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
@@ -112,7 +219,20 @@
 			files = (
 			);
 		};
+		9BB609DB30108AF20055E8E7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9BB609F430108AF40055E8E7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9BB609DE30108AF20055E8E7 /* ApexMapCheckWidgetsExtension */;
+			targetProxy = 9BB609F330108AF40055E8E7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9BB609CC301082F20055E8E7 /* Debug configuration for PBXProject "ApexMapCheck" */ = {
@@ -241,6 +361,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ApexMapCheck/ApexMapCheck.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B9P888266K;
@@ -273,6 +394,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ApexMapCheck/ApexMapCheck.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B9P888266K;
@@ -300,6 +422,68 @@
 			};
 			name = Release;
 		};
+		9BB609F830108AF40055E8E7 /* Debug configuration for PBXNativeTarget "ApexMapCheckWidgetsExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = ApexMapCheckWidgets/ApexMapCheckWidgetsExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B9P888266K;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ApexMapCheckWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ApexMapCheckWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aryanrogye.ApexMapCheck.ApexMapCheckWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9BB609F930108AF40055E8E7 /* Release configuration for PBXNativeTarget "ApexMapCheckWidgetsExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = ApexMapCheckWidgets/ApexMapCheckWidgetsExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B9P888266K;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ApexMapCheckWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ApexMapCheckWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aryanrogye.ApexMapCheck.ApexMapCheckWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -316,6 +500,14 @@
 			buildConfigurations = (
 				9BB609CF301082F20055E8E7 /* Debug configuration for PBXNativeTarget "ApexMapCheck" */,
 				9BB609D0301082F20055E8E7 /* Release configuration for PBXNativeTarget "ApexMapCheck" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		9BB609F730108AF40055E8E7 /* Build configuration list for PBXNativeTarget "ApexMapCheckWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9BB609F830108AF40055E8E7 /* Debug configuration for PBXNativeTarget "ApexMapCheckWidgetsExtension" */,
+				9BB609F930108AF40055E8E7 /* Release configuration for PBXNativeTarget "ApexMapCheckWidgetsExtension" */,
 			);
 			defaultConfigurationName = Release;
 		};
