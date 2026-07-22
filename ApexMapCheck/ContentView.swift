@@ -40,7 +40,11 @@ struct ContentView: View {
                 if model.isLoading && model.rotations.isEmpty {
                     LoadingView()
                 } else if model.rotations.isEmpty, let message = model.errorMessage {
-                    RotationFailureView(message: message, actionURL: model.errorActionURL) {
+                    RotationFailureView(
+                        message: message,
+                        actionURL: model.errorActionURL,
+                        prepareForAction: model.prepareForAccountVerification
+                    ) {
                         Task { await model.refresh() }
                     }
                 } else if model.rotations.isEmpty {
@@ -499,8 +503,11 @@ private struct LoadingView: View {
 }
 
 private struct RotationFailureView: View {
+    @Environment(\.openURL) private var openURL
+
     let message: String
     let actionURL: URL?
+    let prepareForAction: () -> Void
     let retry: () -> Void
 
     var body: some View {
@@ -523,7 +530,10 @@ private struct RotationFailureView: View {
             }
 
             if let actionURL {
-                Link("Verify API account", destination: actionURL)
+                Button("Verify API account") {
+                    prepareForAction()
+                    openURL(actionURL)
+                }
                     .buttonStyle(.borderedProminent)
                     .tint(.apexRed)
             }

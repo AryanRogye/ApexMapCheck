@@ -40,6 +40,11 @@ struct RotationStore: Sendable {
         defaults.removeObject(forKey: Key.apiKey)
     }
 
+    func prepareForAccountVerification() {
+        defaults.removeObject(forKey: Key.lastAttempt)
+        defaults.removeObject(forKey: Key.lastFailure)
+    }
+
     func loadSmart(apiKey: String? = nil, force: Bool = false, now: Date = .now) async throws -> RotationSnapshot {
         let cached = loadSnapshot()
         let effectiveKey = apiKey ?? loadAPIKey()

@@ -79,6 +79,10 @@ final class RotationViewModel: ObservableObject {
         lastUpdated = nil
     }
 
+    func prepareForAccountVerification() {
+        store.prepareForAccountVerification()
+    }
+
     private static func bundledAPIKey() -> String? {
         guard
             let url = Bundle.main.url(forResource: "Secrets", withExtension: "plist"),
