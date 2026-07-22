@@ -106,8 +106,6 @@ struct ApexMapCheckWidgetsEntryView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.68)
 
-                switchTimer(mode.current)
-
                 compactNextBlock(mode)
             } else {
                 unavailableView
@@ -133,7 +131,6 @@ struct ApexMapCheckWidgetsEntryView: View {
                     .lineLimit(2)
                     .minimumScaleFactor(0.72)
 
-                switchTimer(mode.current)
                 nextLine(mode)
             } else {
                 unavailableView
@@ -152,9 +149,6 @@ struct ApexMapCheckWidgetsEntryView: View {
                         Text(mode.displayName.uppercased())
                             .fontWeight(.bold)
                         Spacer()
-                        if let end = mode.current.end {
-                            Text(end, style: .timer).monospacedDigit()
-                        }
                     }
                     .font(.caption2)
 
@@ -195,8 +189,8 @@ struct ApexMapCheckWidgetsEntryView: View {
                         .font(.caption.weight(.black))
                         .lineLimit(1)
                     if let end = mode.current.end {
-                        Text(end, style: .timer)
-                            .font(.system(size: 8, weight: .bold, design: .monospaced))
+                        Text(end, style: .time)
+                            .font(.system(size: 8, weight: .bold))
                     }
                 }
             } else {
@@ -223,19 +217,6 @@ struct ApexMapCheckWidgetsEntryView: View {
         .widgetAccentable()
     }
 
-    private func switchTimer(_ window: MapWindow) -> some View {
-        Group {
-            if let end = window.end, end > entry.date {
-                Text(end, style: .timer)
-                    .monospacedDigit()
-            } else {
-                Text("Switching…")
-            }
-        }
-        .font(.subheadline.weight(.bold))
-        .foregroundStyle(.white.opacity(0.72))
-    }
-
     private func nextLine(_ mode: GameModeRotation) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             HStack(spacing: 4) {
@@ -253,7 +234,7 @@ struct ApexMapCheckWidgetsEntryView: View {
             }
 
             if let start = mode.next?.start ?? mode.current.end {
-                Text("Starts \(start, style: .time)")
+                Text("At \(start, style: .time)")
                     .foregroundStyle(.white.opacity(0.48))
             }
         }
@@ -274,7 +255,7 @@ struct ApexMapCheckWidgetsEntryView: View {
             }
 
             if let start = mode.next?.start ?? mode.current.end {
-                Text("Starts \(start, style: .time)")
+                Text("At \(start, style: .time)")
                     .foregroundStyle(.white.opacity(0.48))
             }
         }
@@ -300,9 +281,10 @@ struct ApexMapCheckWidgetsEntryView: View {
 
     private var accessibilitySummary: String {
         guard let mode = entry.selectedMode else { return "Open Apex Map Check to sync rotations" }
-        let remaining = mode.current.accessibleTimeRemaining(at: entry.date)
+        let switchTime = (mode.next?.start ?? mode.current.end)?.formatted(date: .omitted, time: .shortened)
         let next = mode.next.map { ", next \($0.map)" } ?? ""
-        return "\(mode.displayName), \(mode.current.map), \(remaining) remaining\(next)"
+        let time = switchTime.map { " at \($0)" } ?? ""
+        return "\(mode.displayName), \(mode.current.map)\(next)\(time)"
     }
 }
 
