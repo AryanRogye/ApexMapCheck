@@ -154,78 +154,91 @@ private struct RotationCard: View {
     let rotation: GameModeRotation
 
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            mapArtwork
+        GeometryReader { proxy in
+            ZStack(alignment: .bottomLeading) {
+                mapArtwork
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+                    .clipped()
 
-            LinearGradient(
-                colors: [.clear, .black.opacity(0.22), .black.opacity(0.94)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
+                LinearGradient(
+                    colors: [.clear, .black.opacity(0.22), .black.opacity(0.94)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
 
-            VStack(alignment: .leading, spacing: 14) {
-                HStack {
-                    Label(rotation.displayName.uppercased(), systemImage: rotation.symbolName)
-                        .font(.caption.weight(.black))
-                        .tracking(1.1)
-                        .foregroundStyle(.white.opacity(0.88))
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack {
+                        Label(rotation.displayName.uppercased(), systemImage: rotation.symbolName)
+                            .font(.caption.weight(.black))
+                            .tracking(1.1)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 11)
+                            .padding(.vertical, 7)
+                            .background(.black.opacity(0.58), in: Capsule())
+                            .overlay {
+                                Capsule()
+                                    .stroke(.white.opacity(0.16), lineWidth: 1)
+                            }
 
-                    Spacer()
+                        Spacer()
 
-                    Text("LIVE")
-                        .font(.caption2.weight(.black))
-                        .tracking(1.2)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 9)
-                        .padding(.vertical, 5)
-                        .background(Color.apexRed, in: Capsule())
-                }
-
-                Spacer(minLength: 36)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(rotation.current.map)
-                        .font(.system(.title, design: .rounded, weight: .black))
-                        .tracking(-0.7)
-                        .foregroundStyle(.white)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.75)
-
-                    TimelineView(.periodic(from: .now, by: 1)) { context in
-                        Text(rotation.current.countdown(at: context.date))
-                            .font(.system(.title3, design: .monospaced, weight: .bold))
-                            .foregroundStyle(.white.opacity(0.78))
-                            .contentTransition(.numericText())
-                            .accessibilityLabel("\(rotation.current.accessibleTimeRemaining(at: context.date)) remaining")
+                        Text("LIVE")
+                            .font(.caption2.weight(.black))
+                            .tracking(1.2)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 5)
+                            .background(Color.apexRed, in: Capsule())
                     }
-                }
 
-                if let next = rotation.next {
-                    Divider()
-                        .overlay(.white.opacity(0.18))
+                    Spacer(minLength: 36)
 
-                    ViewThatFits(in: .horizontal) {
-                        HStack(spacing: 8) {
-                            nextLabel
-                            nextMap(next)
-                            Spacer()
-                            duration(next)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(rotation.current.map)
+                            .font(.system(.title, design: .rounded, weight: .black))
+                            .tracking(-0.7)
+                            .foregroundStyle(.white)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.75)
+
+                        TimelineView(.periodic(from: .now, by: 1)) { context in
+                            Text(rotation.current.countdown(at: context.date))
+                                .font(.system(.title3, design: .monospaced, weight: .bold))
+                                .foregroundStyle(.white.opacity(0.78))
+                                .contentTransition(.numericText())
+                                .accessibilityLabel("\(rotation.current.accessibleTimeRemaining(at: context.date)) remaining")
                         }
+                    }
 
-                        VStack(alignment: .leading, spacing: 6) {
-                            nextLabel
-                            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    if let next = rotation.next {
+                        Divider()
+                            .overlay(.white.opacity(0.18))
+
+                        ViewThatFits(in: .horizontal) {
+                            HStack(spacing: 8) {
+                                nextLabel
                                 nextMap(next)
                                 Spacer()
                                 duration(next)
                             }
+
+                            VStack(alignment: .leading, spacing: 6) {
+                                nextLabel
+                                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                    nextMap(next)
+                                    Spacer()
+                                    duration(next)
+                                }
+                            }
                         }
                     }
                 }
+                .padding(20)
+                .frame(width: proxy.size.width, height: proxy.size.height)
             }
-            .padding(20)
         }
-        .frame(minHeight: 286)
+        .frame(maxWidth: .infinity)
+        .frame(height: 286)
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 28, style: .continuous)
