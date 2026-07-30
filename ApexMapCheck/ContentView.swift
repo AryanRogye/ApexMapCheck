@@ -1,8 +1,111 @@
 import SwiftUI
 
+private enum AppSection: String, CaseIterable, Identifiable {
+    case rotations
+    case legends
+    case intel
+    case settings
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .rotations: "Rotations"
+        case .legends: "Legends"
+        case .intel: "Intel"
+        case .settings: "Settings"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .rotations: "map.fill"
+        case .legends: "person.3.fill"
+        case .intel: "newspaper.fill"
+        case .settings: "gearshape.fill"
+        }
+    }
+}
+
 struct ContentView: View {
     @StateObject private var model = RotationViewModel()
-    @State private var showingSettings = false
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @State private var selection: AppSection = .rotations
+
+    init() {
+#if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--show-legends") {
+            _selection = State(initialValue: .legends)
+        }
+#endif
+    }
+
+    var body: some View {
+        Group {
+            if horizontalSizeClass == .regular {
+                NavigationSplitView {
+                    List(
+                        AppSection.allCases,
+                        selection: Binding<AppSection?>(
+                            get: { selection },
+                            set: { newValue in
+                                if let newValue {
+                                    selection = newValue
+                                }
+                            }
+                        )
+                    ) { section in
+                        Label(section.title, systemImage: section.symbol)
+                            .tag(section)
+                    }
+                    .navigationTitle("APEX")
+                    .tint(.apexRed)
+                } detail: {
+                    sectionView(selection)
+                }
+                .navigationSplitViewStyle(.balanced)
+            } else {
+                TabView(selection: $selection) {
+                    ForEach(AppSection.allCases) { section in
+                        sectionView(section)
+                            .tag(section)
+                            .tabItem {
+                                Label(section.title, systemImage: section.symbol)
+                            }
+                    }
+                }
+                .tint(.apexRed)
+            }
+        }
+        .preferredColorScheme(.dark)
+        .task {
+            await model.loadIfNeeded()
+        }
+    }
+
+    @ViewBuilder
+    private func sectionView(_ section: AppSection) -> some View {
+        switch section {
+        case .rotations:
+            RotationScreen(model: model)
+        case .legends:
+            LegendsScreen()
+        case .intel:
+            IntelScreen(model: model)
+        case .settings:
+            SettingsView(
+                currentKey: model.usesBundledAPIKey ? "" : model.apiKey,
+                usesBundledKey: model.usesBundledAPIKey,
+                onSave: { key in await model.saveAPIKey(key) },
+                onRemove: { model.removeAPIKey() }
+            )
+        }
+    }
+}
+
+private struct RotationScreen: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @ObservedObject var model: RotationViewModel
 
     var body: some View {
         ZStack {
@@ -16,26 +119,12 @@ struct ContentView: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
-        .sheet(isPresented: $showingSettings) {
-            SettingsView(
-                currentKey: model.usesBundledAPIKey ? "" : model.apiKey,
-                usesBundledKey: model.usesBundledAPIKey,
-                onSave: { key in await model.saveAPIKey(key) },
-                onRemove: { model.removeAPIKey() }
-            )
-            .presentationDetents([.medium, .large])
-            .presentationDragIndicator(.visible)
-        }
-        .task {
-            await model.loadIfNeeded()
-        }
     }
 
     private var rotationContent: some View {
         ScrollView {
             LazyVStack(spacing: 18) {
-                header
+                ScreenHeader(eyebrow: "LIVE NOW", title: "Map Rotation", symbol: "map.fill")
 
                 if model.isLoading && model.rotations.isEmpty {
                     LoadingView()
@@ -62,60 +151,16 @@ struct ContentView: View {
                         RotationCard(rotation: rotation)
                     }
 
-                    PatchNotesCard(
-                        note: model.latestPatchNote,
-                        isLoading: model.isLoadingPatchNotes
-                    )
-
                     statusFooter
                 }
             }
             .padding(.horizontal, 18)
-            .padding(.bottom, 28)
+            .padding(.bottom, horizontalSizeClass == .compact ? 110 : 28)
         }
         .refreshable {
-            async let rotations: Void = model.refresh()
-            async let patchNotes: Void = model.loadPatchNotes(force: true)
-            await rotations
-            await patchNotes
+            await model.refresh()
         }
         .scrollIndicators(.hidden)
-    }
-
-    private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("APEX")
-                    .font(.caption.weight(.black))
-                    .tracking(2.6)
-                    .foregroundStyle(Color.apexRed)
-
-                Text("Map Rotation")
-                    .font(.largeTitle.weight(.black))
-                    .tracking(-1.1)
-                    .foregroundStyle(.white)
-            }
-
-            Spacer()
-
-            if model.isLoading {
-                ProgressView()
-                    .tint(.white)
-                    .accessibilityLabel("Refreshing rotations")
-            }
-
-            Button {
-                showingSettings = true
-            } label: {
-                Image(systemName: "gearshape.fill")
-                    .font(.body.weight(.semibold))
-                    .frame(width: 44, height: 44)
-                    .background(.thinMaterial, in: Circle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("API settings")
-        }
-        .padding(.top, 18)
     }
 
     private var statusFooter: some View {
@@ -138,6 +183,79 @@ struct ContentView: View {
             .accessibilityHint("Opens the data provider website")
         }
         .padding(.top, 6)
+    }
+}
+
+private struct IntelScreen: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @ObservedObject var model: RotationViewModel
+
+    var body: some View {
+        ZStack {
+            AppBackground()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    ScreenHeader(eyebrow: "FROM EA", title: "Intel", symbol: "newspaper.fill")
+
+                    Text("Updates from the Outlands")
+                        .font(.title2.weight(.black))
+                        .foregroundStyle(.white)
+
+                    PatchNotesCard(
+                        note: model.latestPatchNote,
+                        isLoading: model.isLoadingPatchNotes
+                    )
+
+                    if model.latestPatchNote == nil, !model.isLoadingPatchNotes {
+                        ContentUnavailableView {
+                            Label("No intel available", systemImage: "antenna.radiowaves.left.and.right.slash")
+                        } description: {
+                            Text("Pull to refresh and check again.")
+                        }
+                        .frame(minHeight: 280)
+                    }
+                }
+                .padding(.horizontal, 18)
+                .padding(.bottom, horizontalSizeClass == .compact ? 110 : 28)
+            }
+            .refreshable {
+                await model.loadPatchNotes(force: true)
+            }
+            .scrollIndicators(.hidden)
+        }
+    }
+}
+
+struct ScreenHeader: View {
+    let eyebrow: String
+    let title: String
+    let symbol: String
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 14) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(eyebrow)
+                    .font(.caption.weight(.black))
+                    .tracking(2.6)
+                    .foregroundStyle(Color.apexRed)
+
+                Text(title)
+                    .font(.largeTitle.weight(.black))
+                    .tracking(-1.1)
+                    .foregroundStyle(.white)
+            }
+
+            Spacer()
+
+            Image(systemName: symbol)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(.white)
+                .frame(width: 46, height: 46)
+                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .accessibilityHidden(true)
+        }
+        .padding(.top, 18)
     }
 }
 
@@ -206,7 +324,7 @@ private struct PatchNotesCard: View {
     }
 }
 
-private struct AppBackground: View {
+struct AppBackground: View {
     var body: some View {
         ZStack {
             Color(red: 0.035, green: 0.039, blue: 0.05)
@@ -474,7 +592,6 @@ private struct APIKeySetupView: View {
 }
 
 private struct SettingsView: View {
-    @Environment(\.dismiss) private var dismiss
     @State private var key: String
     @State private var isSaving = false
 
@@ -522,14 +639,12 @@ private struct SettingsView: View {
                             Task {
                                 await onSave(key.trimmingCharacters(in: .whitespacesAndNewlines))
                                 isSaving = false
-                                dismiss()
                             }
                         }
                         .disabled(key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving)
 
                         Button("Remove API key", role: .destructive) {
                             onRemove()
-                            dismiss()
                         }
                     }
                 }
@@ -541,17 +656,11 @@ private struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
-                }
-            }
         }
     }
 }
 
-private struct ErrorBanner: View {
+struct ErrorBanner: View {
     let message: String
     let retry: () -> Void
 
