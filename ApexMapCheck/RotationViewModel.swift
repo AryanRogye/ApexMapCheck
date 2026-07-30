@@ -11,9 +11,12 @@ final class RotationViewModel: ObservableObject {
     @Published private(set) var errorActionURL: URL?
     @Published private(set) var lastUpdated: Date?
     @Published private(set) var usesBundledAPIKey = false
+    @Published private(set) var latestPatchNote: PatchNote?
+    @Published private(set) var isLoadingPatchNotes = false
 
     private let store = RotationStore()
     private let keychain = KeychainStore()
+    private let patchNotesService = PatchNotesService()
     private var didLoad = false
 
     var hasAPIKey: Bool { !apiKey.isEmpty }
@@ -50,8 +53,11 @@ final class RotationViewModel: ObservableObject {
     func loadIfNeeded() async {
         guard !didLoad else { return }
         didLoad = true
-        guard hasAPIKey else { return }
-        await refresh(force: false)
+        async let patchNotes: Void = loadPatchNotes()
+        if hasAPIKey {
+            await refresh(force: false)
+        }
+        await patchNotes
     }
 
     func saveAPIKey(_ key: String) async {
@@ -126,4 +132,10 @@ final class RotationViewModel: ObservableObject {
         }
     }
 
+    func loadPatchNotes(force: Bool = false) async {
+        guard !isLoadingPatchNotes else { return }
+        isLoadingPatchNotes = true
+        defer { isLoadingPatchNotes = false }
+        latestPatchNote = try? await patchNotesService.latest(force: force)
+    }
 }

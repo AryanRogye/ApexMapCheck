@@ -62,6 +62,11 @@ struct ContentView: View {
                         RotationCard(rotation: rotation)
                     }
 
+                    PatchNotesCard(
+                        note: model.latestPatchNote,
+                        isLoading: model.isLoadingPatchNotes
+                    )
+
                     statusFooter
                 }
             }
@@ -69,7 +74,10 @@ struct ContentView: View {
             .padding(.bottom, 28)
         }
         .refreshable {
-            await model.refresh()
+            async let rotations: Void = model.refresh()
+            async let patchNotes: Void = model.loadPatchNotes(force: true)
+            await rotations
+            await patchNotes
         }
         .scrollIndicators(.hidden)
     }
@@ -130,6 +138,71 @@ struct ContentView: View {
             .accessibilityHint("Opens the data provider website")
         }
         .padding(.top, 6)
+    }
+}
+
+private struct PatchNotesCard: View {
+    let note: PatchNote?
+    let isLoading: Bool
+
+    var body: some View {
+        Group {
+            if let note {
+                Link(destination: note.url) {
+                    HStack(spacing: 14) {
+                        Image(systemName: "newspaper.fill")
+                            .font(.title3)
+                            .foregroundStyle(Color.apexRed)
+                            .frame(width: 38, height: 38)
+                            .background(Color.apexRed.opacity(0.13), in: Circle())
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("LATEST PATCH NOTES")
+                                .font(.caption2.weight(.black))
+                                .tracking(1.1)
+                                .foregroundStyle(.white.opacity(0.55))
+
+                            Text(note.title)
+                                .font(.headline.weight(.bold))
+                                .foregroundStyle(.white)
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(2)
+
+                            if let date = note.publishedAt {
+                                Text(date, format: .dateTime.month(.abbreviated).day().year())
+                                    .font(.caption)
+                                    .foregroundStyle(.white.opacity(0.55))
+                            }
+                        }
+
+                        Spacer(minLength: 4)
+
+                        Image(systemName: "arrow.up.right")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(.white.opacity(0.6))
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .stroke(.white.opacity(0.1), lineWidth: 1)
+                    }
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Opens the official Electronic Arts patch notes")
+            } else if isLoading {
+                HStack(spacing: 10) {
+                    ProgressView()
+                        .tint(.white)
+                    Text("Checking for patch notes…")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.65))
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 8)
+            }
+        }
     }
 }
 

@@ -3,13 +3,15 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 110;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		9BB609E230108AF20055E8E7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BB609E130108AF20055E8E7 /* WidgetKit.framework */; };
 		9BB609E430108AF20055E8E7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BB609E330108AF20055E8E7 /* SwiftUI.framework */; };
 		9BB609F530108AF40055E8E7 /* ApexMapCheckWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9BB609DF30108AF20055E8E7 /* ApexMapCheckWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		9BB629AA301BDA0100F5011A /* ApexMapCheck.icon in Resources */ = {isa = PBXBuildFile; fileRef = 9BB629A9301BDA0100F5011A /* ApexMapCheck.icon */; };
+		9BB629AB301BDA0100F5011A /* ApexMapCheck.icon in Resources */ = {isa = PBXBuildFile; fileRef = 9BB629A9301BDA0100F5011A /* ApexMapCheck.icon */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,6 +41,7 @@
 		9BB609DF30108AF20055E8E7 /* ApexMapCheckWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ApexMapCheckWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BB609E130108AF20055E8E7 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		9BB609E330108AF20055E8E7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		9BB629A9301BDA0100F5011A /* ApexMapCheck.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = ApexMapCheck.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -91,6 +94,7 @@
 		9BB609BA301082F00055E8E7 = {
 			isa = PBXGroup;
 			children = (
+				9BB629A9301BDA0100F5011A /* ApexMapCheck.icon */,
 				9BB609C5301082F00055E8E7 /* ApexMapCheck */,
 				9BB609E530108AF20055E8E7 /* ApexMapCheckWidgets */,
 				A1000001301090000055E8E7 /* Shared */,
@@ -204,11 +208,13 @@
 		9BB609C1301082F00055E8E7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
+				9BB629AA301BDA0100F5011A /* ApexMapCheck.icon in Resources */,
 			);
 		};
 		9BB609DD30108AF20055E8E7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
+				9BB629AB301BDA0100F5011A /* ApexMapCheck.icon in Resources */,
 			);
 		};
 /* End PBXResourcesBuildPhase section */
@@ -359,7 +365,7 @@
 		9BB609CF301082F20055E8E7 /* Debug configuration for PBXNativeTarget "ApexMapCheck" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = ApexMapCheck;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ApexMapCheck/ApexMapCheck.entitlements;
 				CODE_SIGN_STYLE = Automatic;
@@ -372,6 +378,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -392,7 +399,7 @@
 		9BB609D0301082F20055E8E7 /* Release configuration for PBXNativeTarget "ApexMapCheck" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = ApexMapCheck;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ApexMapCheck/ApexMapCheck.entitlements;
 				CODE_SIGN_STYLE = Automatic;
@@ -405,6 +412,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
