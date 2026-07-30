@@ -158,8 +158,9 @@ struct ApexMapCheckWidgetsEntryView: View {
 
                     if let next = mode.next {
                         HStack(spacing: 4) {
-                            Text("Next \(next.map)")
+                            Text("\(next.map)")
                                 .lineLimit(1)
+                                .minimumScaleFactor(0.5)
                             Spacer()
                             if let start = next.start ?? mode.current.end {
                                 Text(start, style: .time)
