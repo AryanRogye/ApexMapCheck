@@ -1,5 +1,5 @@
-import Combine
 import Foundation
+import Observation
 
 nonisolated enum LegendRank: String, CaseIterable, Identifiable, Sendable {
     case any
@@ -165,11 +165,12 @@ nonisolated enum LegendPickRateError: LocalizedError {
 }
 
 @MainActor
-final class LegendPickRatesViewModel: ObservableObject {
-    @Published var selectedRank: LegendRank = .any
-    @Published private(set) var snapshot: LegendPickRateSnapshot?
-    @Published private(set) var isLoading = false
-    @Published private(set) var errorMessage: String?
+@Observable
+final class LegendPickRatesViewModel {
+    var selectedRank: LegendRank = .any
+    private(set) var snapshot: LegendPickRateSnapshot?
+    private(set) var isLoading = false
+    private(set) var errorMessage: String?
 
     private let service = LegendPickRateService()
 

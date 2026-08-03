@@ -1,16 +1,17 @@
-import Combine
 import Foundation
+import Observation
 
 @MainActor
-final class PlayerViewModel: ObservableObject {
-    @Published var query = ""
-    @Published var platform: PlayerPlatform = .pc
-    @Published private(set) var favorites: [PlayerSnapshot] = []
-    @Published private(set) var selectedPlayer: PlayerSnapshot?
-    @Published private(set) var isLoading = false
-    @Published private(set) var errorMessage: String?
-    @Published private(set) var noticeMessage: String?
-    @Published private(set) var nextSearchAt: Date?
+@Observable
+final class PlayerViewModel {
+    var query = ""
+    var platform: PlayerPlatform = .pc
+    private(set) var favorites: [PlayerSnapshot] = []
+    private(set) var selectedPlayer: PlayerSnapshot?
+    private(set) var isLoading = false
+    private(set) var errorMessage: String?
+    private(set) var noticeMessage: String?
+    private(set) var nextSearchAt: Date?
 
     private let api = PlayerAPI()
     private let store = PlayerStore()

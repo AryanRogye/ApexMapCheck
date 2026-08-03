@@ -1,13 +1,14 @@
 import SwiftUI
 
 struct PlayersScreen: View {
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @StateObject private var model = PlayerViewModel()
+    @State private var model = PlayerViewModel()
     @FocusState private var searchFocused: Bool
 
     let apiKey: String
 
     var body: some View {
+        @Bindable var model = model
+
         NavigationStack {
             ZStack {
                 AppBackground()
@@ -78,7 +79,7 @@ struct PlayersScreen: View {
                         PlayerProviderFooter()
                     }
                     .padding(.horizontal, 18)
-                    .padding(.bottom, horizontalSizeClass == .compact ? 110 : 28)
+                    .padding(.bottom, 28)
                     .animation(.snappy(duration: 0.32), value: model.selectedPlayer?.id)
                 }
                 .refreshable {
@@ -86,6 +87,7 @@ struct PlayersScreen: View {
                 }
                 .scrollDismissesKeyboard(.interactively)
                 .scrollIndicators(.hidden)
+                .apexNavigationScrollClearance()
             }
         }
         .task {

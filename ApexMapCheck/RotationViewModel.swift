@@ -1,18 +1,19 @@
-import Combine
 import Foundation
+import Observation
 import WidgetKit
 
 @MainActor
-final class RotationViewModel: ObservableObject {
-    @Published private(set) var apiKey = ""
-    @Published private(set) var rotations: [GameModeRotation] = []
-    @Published private(set) var isLoading = false
-    @Published private(set) var errorMessage: String?
-    @Published private(set) var errorActionURL: URL?
-    @Published private(set) var lastUpdated: Date?
-    @Published private(set) var usesBundledAPIKey = false
-    @Published private(set) var latestPatchNote: PatchNote?
-    @Published private(set) var isLoadingPatchNotes = false
+@Observable
+final class RotationViewModel {
+    private(set) var apiKey = ""
+    private(set) var rotations: [GameModeRotation] = []
+    private(set) var isLoading = false
+    private(set) var errorMessage: String?
+    private(set) var errorActionURL: URL?
+    private(set) var lastUpdated: Date?
+    private(set) var usesBundledAPIKey = false
+    private(set) var latestPatchNote: PatchNote?
+    private(set) var isLoadingPatchNotes = false
 
     private let store = RotationStore()
     private let keychain = KeychainStore()

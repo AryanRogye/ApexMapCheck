@@ -1,8 +1,7 @@
 import SwiftUI
 
 struct LegendsScreen: View {
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @StateObject private var model = LegendPickRatesViewModel()
+    @State private var model = LegendPickRatesViewModel()
 
     var body: some View {
         ZStack {
@@ -25,12 +24,13 @@ struct LegendsScreen: View {
                     }
                 }
                 .padding(.horizontal, 18)
-                .padding(.bottom, horizontalSizeClass == .compact ? 110 : 28)
+                .padding(.bottom, 28)
             }
             .refreshable {
                 await model.load(force: true)
             }
             .scrollIndicators(.hidden)
+            .apexNavigationScrollClearance()
         }
         .task {
             if model.snapshot == nil {
@@ -248,22 +248,6 @@ private struct LegendPickRateRow: View {
         .accessibilityLabel(
             "Rank \(position), \(legend.name), \(legend.pickRate, specifier: "%.1f") percent pick rate"
         )
-    }
-}
-
-private struct ApexSlashPattern: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        let width = rect.width / 3
-        for index in 0..<4 {
-            let x = CGFloat(index) * width - width
-            path.move(to: CGPoint(x: x, y: rect.maxY))
-            path.addLine(to: CGPoint(x: x + width, y: rect.minY))
-            path.addLine(to: CGPoint(x: x + width * 1.65, y: rect.minY))
-            path.addLine(to: CGPoint(x: x + width * 0.65, y: rect.maxY))
-            path.closeSubpath()
-        }
-        return path
     }
 }
 
