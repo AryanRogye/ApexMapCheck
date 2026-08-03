@@ -2,6 +2,7 @@ import SwiftUI
 
 private enum AppSection: String, CaseIterable, Identifiable {
     case rotations
+    case players
     case legends
     case intel
     case settings
@@ -11,6 +12,7 @@ private enum AppSection: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .rotations: "Rotations"
+        case .players: "Players"
         case .legends: "Legends"
         case .intel: "Intel"
         case .settings: "Settings"
@@ -20,6 +22,7 @@ private enum AppSection: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .rotations: "map.fill"
+        case .players: "person.crop.circle.badge.magnifyingglass"
         case .legends: "person.3.fill"
         case .intel: "newspaper.fill"
         case .settings: "gearshape.fill"
@@ -34,7 +37,9 @@ struct ContentView: View {
 
     init() {
 #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--show-legends") {
+        if ProcessInfo.processInfo.arguments.contains("--show-players") {
+            _selection = State(initialValue: .players)
+        } else if ProcessInfo.processInfo.arguments.contains("--show-legends") {
             _selection = State(initialValue: .legends)
         }
 #endif
@@ -65,16 +70,9 @@ struct ContentView: View {
                 }
                 .navigationSplitViewStyle(.balanced)
             } else {
-                TabView(selection: $selection) {
-                    ForEach(AppSection.allCases) { section in
-                        sectionView(section)
-                            .tag(section)
-                            .tabItem {
-                                Label(section.title, systemImage: section.symbol)
-                            }
-                    }
+                ApexSidebarLayout(selection: $selection) {
+                    sectionView(selection)
                 }
-                .tint(.apexRed)
             }
         }
         .preferredColorScheme(.dark)
@@ -88,6 +86,8 @@ struct ContentView: View {
         switch section {
         case .rotations:
             RotationScreen(model: model)
+        case .players:
+            PlayersScreen(apiKey: model.apiKey)
         case .legends:
             LegendsScreen()
         case .intel:
@@ -100,6 +100,331 @@ struct ContentView: View {
                 onRemove: { model.removeAPIKey() }
             )
         }
+    }
+}
+
+private struct SidebarActionKey: EnvironmentKey {
+    static let defaultValue: (() -> Void)? = nil
+}
+
+private extension EnvironmentValues {
+    var apexSidebarAction: (() -> Void)? {
+        get { self[SidebarActionKey.self] }
+        set { self[SidebarActionKey.self] = newValue }
+    }
+}
+
+private struct ApexSidebarLayout<Content: View>: View {
+    private enum DragIntent {
+        case undecided
+        case horizontal
+        case ignored
+    }
+
+    @Binding var selection: AppSection
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var sidebarProgress: CGFloat = 0
+    @State private var dragStartProgress: CGFloat?
+    @State private var dragIntent: DragIntent = .undecided
+
+    let content: () -> Content
+
+    init(
+        selection: Binding<AppSection>,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        _selection = selection
+        self.content = content
+#if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--show-sidebar") {
+            _sidebarProgress = State(initialValue: 1)
+        }
+#endif
+    }
+
+    var body: some View {
+        GeometryReader { proxy in
+            let drawerWidth = min(308, proxy.size.width * 0.84)
+
+            ZStack(alignment: .leading) {
+                AppBackground()
+
+                content()
+                    .environment(\.apexSidebarAction, { openSidebar() })
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .scaleEffect(1 - 0.035 * sidebarProgress, anchor: .leading)
+                    .rotation3DEffect(
+                        .degrees(-3.5 * sidebarProgress),
+                        axis: (x: 0, y: 1, z: 0),
+                        anchor: .leading,
+                        perspective: 0.8
+                    )
+                    .offset(x: (drawerWidth - 18) * sidebarProgress)
+                    .overlay {
+                        if sidebarProgress > 0.01 {
+                            Color.black
+                                .opacity(0.46 * sidebarProgress)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    closeSidebar()
+                                }
+                        }
+                    }
+
+                ApexSidebar(
+                    selection: $selection,
+                    select: select
+                )
+                .frame(width: drawerWidth)
+                .offset(x: -drawerWidth + drawerWidth * sidebarProgress)
+                .shadow(color: .black.opacity(0.46), radius: 28, x: 12, y: 0)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .overlay(alignment: .leading) {
+                VStack(spacing: 0) {
+                    Color.clear
+                        .frame(height: 88)
+                        .allowsHitTesting(false)
+
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .gesture(sidebarDrag(width: drawerWidth))
+                        .allowsHitTesting(
+                            sidebarProgress < 0.01 || dragStartProgress == 0
+                        )
+                }
+                .frame(width: 28)
+                .accessibilityHidden(true)
+            }
+            .overlay(alignment: .leading) {
+                HStack(spacing: 0) {
+                    Color.clear
+                        .frame(width: drawerWidth - 44)
+                        .allowsHitTesting(false)
+
+                    Color.clear
+                        .frame(width: 44)
+                        .contentShape(Rectangle())
+                        .gesture(sidebarDrag(width: drawerWidth))
+                        .allowsHitTesting(
+                            sidebarProgress > 0.99 || dragStartProgress == 1
+                        )
+                }
+                .frame(maxHeight: .infinity)
+                .accessibilityHidden(true)
+            }
+        }
+    }
+
+    private func select(_ section: AppSection) {
+        selection = section
+        closeSidebar()
+    }
+
+    private func openSidebar() {
+        withAnimation(sidebarAnimation) {
+            sidebarProgress = 1
+        }
+    }
+
+    private func closeSidebar() {
+        withAnimation(sidebarAnimation) {
+            sidebarProgress = 0
+        }
+    }
+
+    private func sidebarDrag(width: CGFloat) -> some Gesture {
+        DragGesture(minimumDistance: 12, coordinateSpace: .local)
+            .onChanged { value in
+                guard dragIntent != .ignored else { return }
+
+                if dragIntent == .undecided {
+                    let horizontalDistance = abs(value.translation.width)
+                    let verticalDistance = abs(value.translation.height)
+                    let startedAtClosedEdge = sidebarProgress > 0.01
+                        || value.startLocation.x <= 28
+                    let movesTowardDrawer = sidebarProgress > 0.01
+                        || value.translation.width > 0
+
+                    if verticalDistance > horizontalDistance * 1.15
+                        || !startedAtClosedEdge
+                        || !movesTowardDrawer {
+                        dragIntent = .ignored
+                        return
+                    }
+
+                    guard horizontalDistance > verticalDistance * 1.15 else {
+                        return
+                    }
+
+                    dragIntent = .horizontal
+                    dragStartProgress = sidebarProgress
+                }
+
+                guard dragIntent == .horizontal else { return }
+
+                let start = dragStartProgress ?? sidebarProgress
+                sidebarProgress = min(
+                    1,
+                    max(0, start + value.translation.width / width)
+                )
+            }
+            .onEnded { value in
+                guard dragIntent == .horizontal else {
+                    resetDrag()
+                    return
+                }
+
+                let projectedMomentum = (value.predictedEndTranslation.width
+                    - value.translation.width) / width
+                let limitedMomentum = min(0.22, max(-0.22, projectedMomentum))
+                let projectedProgress = sidebarProgress + limitedMomentum
+                let target: CGFloat = projectedProgress >= 0.5 ? 1 : 0
+
+                resetDrag()
+                withAnimation(sidebarAnimation) {
+                    sidebarProgress = target
+                }
+            }
+    }
+
+    private func resetDrag() {
+        dragStartProgress = nil
+        dragIntent = .undecided
+    }
+
+    private var sidebarAnimation: Animation {
+        reduceMotion
+            ? .easeOut(duration: 0.18)
+            : .interactiveSpring(response: 0.32, dampingFraction: 0.86)
+    }
+}
+
+private struct ApexSidebar: View {
+    @Binding var selection: AppSection
+    let select: (AppSection) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("APEX MAP CHECK")
+                    .font(.headline.weight(.black))
+                    .tracking(1.5)
+                    .foregroundStyle(.white)
+
+                Text("NAVIGATION")
+                    .font(.caption2.weight(.bold))
+                    .tracking(1.6)
+                    .foregroundStyle(.white.opacity(0.44))
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 18)
+            .padding(.bottom, 28)
+
+            Text("DROP IN")
+                .font(.caption2.weight(.black))
+                .tracking(1.8)
+                .foregroundStyle(Color.apexRed)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 8)
+
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 6) {
+                    ForEach(AppSection.allCases) { section in
+                        SidebarRow(
+                            section: section,
+                            isSelected: selection == section,
+                            action: { select(section) }
+                        )
+                    }
+                }
+                .padding(.horizontal, 12)
+            }
+
+            Spacer(minLength: 20)
+
+            VStack(alignment: .leading, spacing: 5) {
+                Rectangle()
+                    .fill(Color.apexRed.opacity(0.72))
+                    .frame(width: 34, height: 3)
+
+                Text("NOT AFFILIATED WITH EA OR RESPAWN")
+                    .font(.caption2.weight(.bold))
+                    .tracking(0.75)
+                    .foregroundStyle(.white.opacity(0.34))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 22)
+        }
+        .frame(maxHeight: .infinity, alignment: .top)
+        .background {
+            ZStack {
+                Color(red: 0.025, green: 0.029, blue: 0.04)
+
+                LinearGradient(
+                    colors: [Color.apexRed.opacity(0.18), .clear],
+                    startPoint: .topLeading,
+                    endPoint: .center
+                )
+            }
+            .ignoresSafeArea()
+        }
+        .overlay(alignment: .trailing) {
+            Rectangle()
+                .fill(.white.opacity(0.12))
+                .frame(width: 1)
+                .ignoresSafeArea(.container, edges: .vertical)
+        }
+        .accessibilityElement(children: .contain)
+    }
+}
+
+private struct SidebarRow: View {
+    let section: AppSection
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 13) {
+                Image(systemName: section.symbol)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(isSelected ? Color.apexRed : .white.opacity(0.56))
+                    .frame(width: 24)
+
+                Text(section.title)
+                    .font(.subheadline.weight(isSelected ? .bold : .medium))
+                    .foregroundStyle(.white.opacity(isSelected ? 1 : 0.72))
+
+                Spacer()
+
+                if isSelected {
+                    Image(systemName: "chevron.right")
+                        .font(.caption2.weight(.black))
+                        .foregroundStyle(Color.apexRed)
+                }
+            }
+            .padding(.horizontal, 14)
+            .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
+            .contentShape(Rectangle())
+            .background(
+                isSelected ? Color.apexRed.opacity(0.13) : .clear,
+                in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+            )
+            .overlay(alignment: .leading) {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Color.apexRed)
+                        .frame(width: 3, height: 24)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityHint(isSelected ? "Currently selected" : "Shows \(section.title)")
     }
 }
 
@@ -124,7 +449,7 @@ private struct RotationScreen: View {
     private var rotationContent: some View {
         ScrollView {
             LazyVStack(spacing: 18) {
-                ScreenHeader(eyebrow: "LIVE NOW", title: "Map Rotation", symbol: "map.fill")
+                ScreenHeader(eyebrow: "LIVE NOW", title: "Map Rotation")
 
                 if model.isLoading && model.rotations.isEmpty {
                     LoadingView()
@@ -196,7 +521,7 @@ private struct IntelScreen: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    ScreenHeader(eyebrow: "FROM EA", title: "Intel", symbol: "newspaper.fill")
+                    ScreenHeader(eyebrow: "FROM EA", title: "Intel")
 
                     Text("Updates from the Outlands")
                         .font(.title2.weight(.black))
@@ -228,12 +553,17 @@ private struct IntelScreen: View {
 }
 
 struct ScreenHeader: View {
+    @Environment(\.apexSidebarAction) private var openSidebar
+
     let eyebrow: String
     let title: String
-    let symbol: String
 
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
+            if let openSidebar {
+                SidebarMenuButton(action: openSidebar)
+            }
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(eyebrow)
                     .font(.caption.weight(.black))
@@ -247,13 +577,6 @@ struct ScreenHeader: View {
             }
 
             Spacer()
-
-            Image(systemName: symbol)
-                .font(.title3.weight(.bold))
-                .foregroundStyle(.white)
-                .frame(width: 46, height: 46)
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .accessibilityHidden(true)
         }
         .padding(.top, 18)
     }
@@ -321,6 +644,30 @@ private struct PatchNotesCard: View {
                 .padding(.vertical, 8)
             }
         }
+    }
+}
+
+private struct SidebarMenuButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "line.3.horizontal")
+                .font(.headline.weight(.bold))
+                .foregroundStyle(.white)
+                .frame(width: 52, height: 52)
+                .contentShape(Rectangle())
+                .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 15, style: .continuous)
+                        .stroke(.white.opacity(0.1), lineWidth: 1)
+                }
+        }
+        .frame(width: 52, height: 52)
+        .contentShape(Rectangle())
+        .buttonStyle(.plain)
+        .accessibilityLabel("Open navigation")
+        .accessibilityHint("Shows the app sections")
     }
 }
 
@@ -509,6 +856,7 @@ private struct MapFallback: View {
 }
 
 private struct APIKeySetupView: View {
+    @Environment(\.apexSidebarAction) private var openSidebar
     @State private var key = ""
     @State private var isSaving = false
     @FocusState private var keyFocused: Bool
@@ -518,6 +866,10 @@ private struct APIKeySetupView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
+                if let openSidebar {
+                    SidebarMenuButton(action: openSidebar)
+                }
+
                 Spacer(minLength: 64)
 
                 Image(systemName: "map.fill")
@@ -592,6 +944,7 @@ private struct APIKeySetupView: View {
 }
 
 private struct SettingsView: View {
+    @Environment(\.apexSidebarAction) private var openSidebar
     @State private var key: String
     @State private var isSaving = false
 
@@ -656,6 +1009,13 @@ private struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .toolbar {
+                if let openSidebar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        SidebarMenuButton(action: openSidebar)
+                    }
+                }
+            }
         }
     }
 }

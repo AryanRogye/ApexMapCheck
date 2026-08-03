@@ -10,7 +10,7 @@ struct LegendsScreen: View {
 
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 20) {
-                    ScreenHeader(eyebrow: "CURRENT META", title: "Legend Picks", symbol: "person.3.fill")
+                    ScreenHeader(eyebrow: "CURRENT META", title: "Legend Picks")
 
                     rankPicker
 
